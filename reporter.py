@@ -3,23 +3,19 @@
 import sys, subprocess, json, os , time
 import requests
 from datetime import datetime
-import socket
-from threading import Timer
 from flask import Flask, request ,jsonify
-
-
-def convert_to_json(res):
-    return res    # json.dump() was giving problem |Change it when required
 
 
 def DiskUsage():
     Disk = subprocess.Popen(["df -h| grep -w / "], shell=True ,stdout=subprocess.PIPE)
     out,err = Disk.communicate()
     disklog = out.decode().split()
-    payload= {'Hostname':socket.gethostname(),'MountPoint':disklog[-1],'Totalsize':disklog[1],
+    payload= {'MountPoint':disklog[-1],'Totalsize':disklog[1],
                 'Used':disklog[2],'Avail':disklog[3],'Percentageused':disklog[4]}
+    Hostname = requests.get('http://169.254.169.254/latest/meta-data/hostname')
+    payload['Hostname']= Hostname.content.decode()
     payload['Time']= datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    return convert_to_json(payload)
+    return(payload)
 
 
 def Metadata():
@@ -28,8 +24,8 @@ def Metadata():
     res={}
     for field in fields:
         req= requests.get(url+field)
-        res[field]=req.content.decode()
-    return json.dumps(res)
+        res[field]=str(req.content.decode())
+    return res
 
 
 def MemmoryUtilization():
@@ -41,7 +37,7 @@ def MemmoryUtilization():
                 'Available_Mem':mem[-1],'Mem_used':mem[2]}
     payload['Time']= datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    return convert_to_json(payload)
+    return(payload)
 
 
 def CPUUtilization():
@@ -51,7 +47,7 @@ def CPUUtilization():
     cpu_usage = 100 - float(cpu[-1])
     payload ={'CPUUtilization': str(round(cpu_usage,2)) + ' %'}
     payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    return convert_to_json(payload)
+    return(payload)
 
 
 def NetworkActivity():
@@ -60,7 +56,7 @@ def NetworkActivity():
     net = out.decode().split()
     payload = {'rxpck/s':net[2],'txpck/s':net[3],'rxkB/s':net[4],'txkB/s':net[5]}
     payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    return convert_to_json(payload)
+    return(payload)
 
 
 def NetworkStatus():
@@ -72,7 +68,7 @@ def NetworkStatus():
     if net_status != '0':
         status = 'Disconnected'
     payload = {'NetworkStatus': status , 'Hostname':socket.gethostname()}
-    return convert_to_json(payload)
+    return(payload)
 
 
 def DiskActivity():
@@ -82,29 +78,29 @@ def DiskActivity():
     payload = {'TotalTransections/s':DiskOps[1], 'WriteTransections/s':DiskOps[2],
                 'ReadTransections/s':DiskOps[2] ,'BytesRead/s':DiskOps[3], 'BytesWrite/s':DiskOps[4]}
     payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    return convert_to_json(payload)
+    return(payload)
 
     # routes
 
 app = Flask(__name__)
 
-@app.route('/metadata')
+@app.route('/get/metadata')
 def metadata():
     data =Metadata()
-    return data
+    return jsonify(data)
 
 @app.route('/')
 def index():
     return "Hey there!"
 
-@app.route('/metrics')
+@app.route('/get/metrics')
 def metrics():
     payload = {'CPUUtilization': CPUUtilization(),'DiskActivity':DiskActivity(),'MemmoryUtilization':MemmoryUtilization(),
                 'DiskUsage':DiskUsage(),'NetworkActivity':NetworkActivity()}
     payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     return jsonify(payload)
 
-@app.route('/graph')
+@app.route('/get/graph')
 def graph():
     interval = request.args.get('interval')
     metric_name = request.args.get('metric')
@@ -126,5 +122,5 @@ def graph():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
-    #log = graph()
-    #print(log)       for testing functions
+    # log = metadata()
+    # print(type(log))      # for testing functions
