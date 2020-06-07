@@ -1,14 +1,16 @@
 # !/usr/bin/python3
 
-import sys, subprocess, json, os 
+import sys, subprocess, json, os , time
 import requests
 from datetime import datetime
 import socket
+from threading import Timer
+from flask import Flask, request ,jsonify
 
-from flask import Flask, request 
 
 def convert_to_json(res):
-    return json.dumps(res)
+    return res    # json.dump() was giving problem |Change it when required
+
 
 def DiskUsage():
     Disk = subprocess.Popen(["df -h| grep -w / "], shell=True ,stdout=subprocess.PIPE)
@@ -17,10 +19,8 @@ def DiskUsage():
     payload= {'Hostname':socket.gethostname(),'MountPoint':disklog[-1],'Totalsize':disklog[1],
                 'Used':disklog[2],'Avail':disklog[3],'Percentageused':disklog[4]}
     payload['Time']= datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    
-    # if interval:
-    #     threading.Timer(interval,disk_usage_mem).start()
     return convert_to_json(payload)
+
 
 def Metadata():
     url='http://169.254.169.254/latest/meta-data/'
@@ -30,6 +30,7 @@ def Metadata():
         req= requests.get(url+field)
         res[field]=req.content.decode()
     return json.dumps(res)
+
 
 def MemmoryUtilization():
     mem = subprocess.Popen(["free -h| grep Mem "], shell=True ,stdout=subprocess.PIPE)
@@ -42,6 +43,7 @@ def MemmoryUtilization():
 
     return convert_to_json(payload)
 
+
 def CPUUtilization():
     cpu = subprocess.Popen(["sar| grep Average "], shell=True ,stdout=subprocess.PIPE)
     out,err = cpu.communicate()
@@ -51,6 +53,7 @@ def CPUUtilization():
     payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     return convert_to_json(payload)
 
+
 def NetworkActivity():
     net = subprocess.Popen(["sar -n DEV| grep Average | grep eth0"], shell=True ,stdout=subprocess.PIPE)
     out,err = net.communicate()
@@ -58,6 +61,7 @@ def NetworkActivity():
     payload = {'rxpck/s':net[2],'txpck/s':net[3],'rxkB/s':net[4],'txkB/s':net[5]}
     payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     return convert_to_json(payload)
+
 
 def NetworkStatus():
     net_status = subprocess.Popen(["ping -c 1 -q google.com >&/dev/null; echo $?"], shell=True \
@@ -69,6 +73,7 @@ def NetworkStatus():
         status = 'Disconnected'
     payload = {'NetworkStatus': status , 'Hostname':socket.gethostname()}
     return convert_to_json(payload)
+
 
 def DiskActivity():
     DiskOps = subprocess.Popen(["sar -b | grep Average"], shell=True ,stdout=subprocess.PIPE)
@@ -97,11 +102,24 @@ def metrics():
     payload = {'CPUUtilization': CPUUtilization(),'DiskActivity':DiskActivity(),'MemmoryUtilization':MemmoryUtilization(),
                 'DiskUsage':DiskUsage(),'NetworkActivity':NetworkActivity()}
     payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    # payload = convert_to_json(payload)                  #uncomment to conver to json
-    return payload
+    return jsonify(payload)
 
+@app.route('/graph')
+def graph():
+    interval = request.args.get('interval')
+    metric_name = request.args.get('metric')
+    Metrics = ['CPUUtilization','DiskActivity','MemmoryUtilization',
+                'DiskUsage','NetworkActivity']
+    No_of_Execution=3           # Default value 3
+    payload={"Datapoints":[]}
+    payload["Label"]=metric_name
+    if metric_name in Metrics:
+        for i in range(No_of_Execution):
+            Datapoint=globals()[metric_name]()
+            payload["Datapoints"].append(Datapoint)
+            time.sleep(int(interval))              #query  parametr is always string 
 
-
+    return jsonify(payload)
 
 
 
@@ -110,7 +128,7 @@ if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
     path = '/'
     url = 'https://diskbot.cloudstuff.tech/post'
-    log = metrics()
+    log = graph()
             # r = requests.post(url, data=json.dumps(payload),headers={"Content-Type": "application/json"})#provide with url
             # print(r.text)
     print(log)
