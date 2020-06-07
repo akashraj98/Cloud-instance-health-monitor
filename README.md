@@ -1,11 +1,14 @@
-# Cloud-instance-health-monitor
-Consists of two script 
-reporter.py | Reporter
-manage.py | Manager
+# Cloud Monitoring
 
-Reporter
-Reporter is the  script that is run on each instance and collect data 
-Data collected by reporter 
+
+Cloud Monitoring Application Consists of two main scripts Reorter[reporter.py] and Manager[manage.py]
+
+  - This application can be use to monitor different instances running on cloud and send atomated emails if something went wrong on any instance
+
+### Reporter
+
+  - Reporter is the  script that is run on each instance and collect data 
+  - Data collected by reporter 
     -CPUUtilization
     -DiskActivity
     -MemmoryUtilization
@@ -13,17 +16,23 @@ Data collected by reporter
     -NetworkActivity
     -MetaData
 
-The data collected by reported is exposed by endpoints
-Available Endpoints
-    -/get/metrics
-    -Returns all metrics 
 
-    -/get/graph
-    -Can be use to make graph of a perticular metrics
-    -Query parameter to pass
-        -interval = seconds
-        -metric = name of metric
+The data collected by reported is exposed by endpoints:
+  - Available Endpoints
+    - GET
+      -  /get/metrics : Returns all metrics data
+      -  /get/graph
+    Can be use to make graph of a perticular metrics
+    Query parameter to pass
+          - interval = seconds
+          - metric = name of metric
+     - /get/metadata
+    Returns all metadata about the instance
 
-    -/get/metadata
-Returns metadata about the instance
+#### Example
 
+By default, the Replorter app will use port 5000, 
+
+```sh
+http://13.233.126.248:5000/get/metadata
+```
