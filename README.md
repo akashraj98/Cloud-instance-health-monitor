@@ -29,7 +29,7 @@ The data collected by reported is exposed by endpoints:
      - /get/metadata
     Returns all metadata about the instance
 
-#### Example
+#### Testing Instance
 
 By default, the Replorter app will use port 5000, 
 
