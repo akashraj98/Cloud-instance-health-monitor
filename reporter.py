@@ -5,23 +5,24 @@ import requests
 from datetime import datetime
 import socket
 
+from flask import Flask, request 
 
 def convert_to_json(res):
     return json.dumps(res)
 
-def disk_usage_mem(interval = None):
+def DiskUsage():
     Disk = subprocess.Popen(["df -h| grep -w / "], shell=True ,stdout=subprocess.PIPE)
     out,err = Disk.communicate()
+    disklog = out.decode().split()
     payload= {'Hostname':socket.gethostname(),'MountPoint':disklog[-1],'Totalsize':disklog[1],
                 'Used':disklog[2],'Avail':disklog[3],'Percentageused':disklog[4]}
     payload['Time']= datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    disklog = out.decode().split()
+    
     # if interval:
     #     threading.Timer(interval,disk_usage_mem).start()
-    print(payload)
     return convert_to_json(payload)
 
-def get_metadata():
+def Metadata():
     url='http://169.254.169.254/latest/meta-data/'
     fields=['instance-id' ,'instance-type' , 'public-ipv4', 'ami-id', 'hostname']
     res={}
@@ -30,7 +31,7 @@ def get_metadata():
         res[field]=req.content.decode()
     return json.dumps(res)
 
-def get_mem_usage():
+def MemmoryUtilization():
     mem = subprocess.Popen(["free -h| grep Mem "], shell=True ,stdout=subprocess.PIPE)
     out,err = mem.communicate()
     mem = out.decode().split()
@@ -54,7 +55,7 @@ def NetworkActivity():
     net = subprocess.Popen(["sar -n DEV| grep Average | grep eth0"], shell=True ,stdout=subprocess.PIPE)
     out,err = net.communicate()
     net = out.decode().split()
-    payload = {'rxpck/2':net[2],'txpck/s':net[3],'rxkB/s':net[4],'txkB/s':net[5]}
+    payload = {'rxpck/s':net[2],'txpck/s':net[3],'rxkB/s':net[4],'txkB/s':net[5]}
     payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     return convert_to_json(payload)
 
@@ -78,10 +79,38 @@ def DiskActivity():
     payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     return convert_to_json(payload)
 
+    # routes
+
+app = Flask(__name__)
+
+@app.route('/metadata')
+def metadata():
+    data =Metadata()
+    return data
+
+@app.route('/')
+def index():
+    return "Hey there!"
+
+@app.route('/metrics')
+def metrics():
+    payload = {'CPUUtilization': CPUUtilization(),'DiskActivity':DiskActivity(),'MemmoryUtilization':MemmoryUtilization(),
+                'DiskUsage':DiskUsage(),'NetworkActivity':NetworkActivity()}
+    payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    # payload = convert_to_json(payload)                  #uncomment to conver to json
+    return payload
+
+
+
+
+
+
+
 if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
     path = '/'
     url = 'https://diskbot.cloudstuff.tech/post'
-    log = DiskActivity()
+    log = metrics()
             # r = requests.post(url, data=json.dumps(payload),headers={"Content-Type": "application/json"})#provide with url
             # print(r.text)
     print(log)

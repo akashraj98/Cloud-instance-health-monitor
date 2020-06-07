@@ -6,7 +6,7 @@ companies = [{"id": 1, "name": "Company One"}, {"id": 2, "name": "Company Two"}]
 
 api = Flask(__name__)
 
-@api.route('/companies', methods=['GET'])
+@api.route('/companies', methods=['GET'],)
 def get_companies():
   return json.dumps(companies)
 
