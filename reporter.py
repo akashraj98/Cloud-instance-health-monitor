@@ -126,9 +126,5 @@ def graph():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
-    path = '/'
-    url = 'https://diskbot.cloudstuff.tech/post'
-    log = graph()
-            # r = requests.post(url, data=json.dumps(payload),headers={"Content-Type": "application/json"})#provide with url
-            # print(r.text)
-    print(log)
+    #log = graph()
+    #print(log)       for testing functions
