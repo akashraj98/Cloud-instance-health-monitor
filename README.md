@@ -9,12 +9,12 @@ Cloud Monitoring Application Consists of two main scripts Reorter[reporter.py] a
 
   - Reporter is the  script that is run on each instance and collect data 
   - Data collected by reporter 
-    -CPUUtilization
-    -DiskActivity
-    -MemmoryUtilization
-    -DiskUsage
-    -NetworkActivity
-    -MetaData
+    - CPUUtilization
+    - DiskActivity
+    - MemmoryUtilization
+    - DiskUsage
+    - NetworkActivity
+    - MetaData
 
 
 The data collected by reported is exposed by endpoints:
