@@ -11,7 +11,7 @@ def DiskUsage():
     out,err = Disk.communicate()
     disklog = out.decode().split()
     payload= {'MountPoint':disklog[-1],'Totalsize':disklog[1],
-                'Used':disklog[2],'Avail':disklog[3],'Percentageused':disklog[4]}
+                'Used':disklog[2],'Avail':disklog[3],'Percentageused':disklog[4][:-1]}
     Hostname = requests.get('http://169.254.169.254/latest/meta-data/hostname')
     payload['Hostname']= Hostname.content.decode()
     payload['Time']= datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -33,7 +33,7 @@ def MemmoryUtilization():
     out,err = mem.communicate()
     mem = out.decode().split()
     MemUtilization_per = int(((int(mem[1][:-1])-int(mem[-1][:-1]))/int(mem[1][:-1]))*100)
-    payload = {'Total_Mem':mem[1],'MemoryUtilized':str(MemUtilization_per)+' %',
+    payload = {'Total_Mem':mem[1],'MemoryUtilized':{'Value': str(MemUtilization_per) , 'Unit' : 'percentage'},
                 'Available_Mem':mem[-1],'Mem_used':mem[2]}
     payload['Time']= datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -45,7 +45,7 @@ def CPUUtilization():
     out,err = cpu.communicate()
     cpu = out.decode().split()
     cpu_usage = 100 - float(cpu[-1])
-    payload ={'CPUUtilization': str(round(cpu_usage,2)) + ' %'}
+    payload ={'CPUUtilization':{'Value': str(round(cpu_usage,2)) , 'Unit' : 'percentage'}  }
     payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     return(payload)
 
@@ -93,10 +93,14 @@ def metadata():
 def index():
     return "Hey there!"
 
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
+
 @app.route('/get/metrics')
 def metrics():
     payload = {'CPUUtilization': CPUUtilization(),'DiskActivity':DiskActivity(),'MemmoryUtilization':MemmoryUtilization(),
-                'DiskUsage':DiskUsage(),'NetworkActivity':NetworkActivity()}
+                'DiskUsage':DiskUsage(),'NetworkActivity':NetworkActivity(),'Metadata':Metadata()}
     payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     return jsonify(payload)
 
@@ -106,7 +110,9 @@ def graph():
     metric_name = request.args.get('metric')
     Metrics = ['CPUUtilization','DiskActivity','MemmoryUtilization',
                 'DiskUsage','NetworkActivity']
-    No_of_Execution=3           # Default value 3
+    No_of_Execution=3   # Default value 3
+    # if No_of_Execution is None:
+    #     No_of_Execution = 3
     payload={"Datapoints":[]}
     payload["Label"]=metric_name
     if metric_name in Metrics:
