@@ -6,7 +6,8 @@ from datetime import datetime
 from flask import Flask, request ,jsonify
 
 
-def DiskUsage():
+
+def Diskutilization():
     Disk = subprocess.Popen(["df -h| grep -w / "], shell=True ,stdout=subprocess.PIPE)
     out,err = Disk.communicate()
     disklog = out.decode().split()
@@ -80,9 +81,11 @@ def DiskActivity():
     payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     return(payload)
 
-    # routes
+
 
 app = Flask(__name__)
+
+#routes
 
 @app.route('/get/metadata')
 def metadata():
@@ -100,7 +103,7 @@ def not_found(error):
 @app.route('/get/metrics')
 def metrics():
     payload = {'CPUUtilization': CPUUtilization(),'DiskActivity':DiskActivity(),'MemmoryUtilization':MemmoryUtilization(),
-                'DiskUsage':DiskUsage(),'NetworkActivity':NetworkActivity(),'Metadata':Metadata()}
+                'Diskutilization':Diskutilization(),'NetworkActivity':NetworkActivity(),'Metadata':Metadata()}
     payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     return jsonify(payload)
 
@@ -109,7 +112,7 @@ def graph():
     interval = request.args.get('interval')
     metric_name = request.args.get('metric')
     Metrics = ['CPUUtilization','DiskActivity','MemmoryUtilization',
-                'DiskUsage','NetworkActivity']
+                'Diskutilization','NetworkActivity']
     No_of_Execution=3   # Default value 3
     # if No_of_Execution is None:
     #     No_of_Execution = 3
@@ -128,5 +131,3 @@ def graph():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
-    # log = metadata()
-    # print(type(log))      # for testing functions

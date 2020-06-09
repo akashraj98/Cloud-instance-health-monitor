@@ -1,53 +1,52 @@
 # !/usr/bin/env python3
 
 from flask import Flask, request ,jsonify
-import flask_sqlalchemy import SQLAlchemy
+import sqlite3
 
 api =Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
-db = SQLAlchemy(app)
 
-class Metric(db.Model):
-    instance_id = db.Column(db.Integer,primary_key =True)
-    hotstname = db.Column(db.String(100),unique=True)
-    instance_type = db.Column(db.String(50))
-    public_ipv4= db.Column(db.String(50),unique=True)
-    cpuutilization=db.Column(db.Integer)
-    diskusage=db.Column(db.Integer)
-    disksize = db.Column(db.String(50))
-    diskavail = db.Column(db.String(50))
-    diskused = db.Column(db.String(50))
-    memoryusage = db.Column(db.String(50))
-    memoryutilized = db.Column(db.Integer)
-    memorytotal = db.Column(db.String(50))
-    memoryavail = db.Column(db.String(50))
-    time = db.Column(db.String(50))
+conn = sqlite3.connect('instance.db)
 
-@app.route('/post/data', method = 'POST')
+cursor= conn.cursor()
+table = 'Instance'
+
+#Table is created
+cursor.execute('CREATE TABLE IF NOT EXISTS {table} (INSTANCE_ID TEXT ,HOSTNAME TEXT,INSTANCE_TYPE TEXT,\
+                PUBLIC_IPV4 TEXT,CPUUTILIZATION INTEGER,DISKUTILIZATION INTEGER,DISKSIZE TEXT \
+                DISKAVAIL TEXT,DISKUSED TEXT,MEMORYUSAGE TEXT , MEMORYUTILIZATION INTEGER \
+                MEMORYTOTAL TEXT, MEMORYAVAIL TEXT, LOG_TIME TEXT );'.format{table})
+
+conn.commit()
+conn.close()
+
+@app.route('app/post/data', method='POST')
 def data():
-    request_json = request.json()
-    metric =  Metric(instance_id = request_json["Metadata"]["instance-id"]),
+    json_request = request.json()
+    c = conn.cursor()
+    #insert into table ,if row already exist update the same row
+    c.execute('INSERT INTO {table} (INSTANCE_ID ,HOSTNAME ,INSTANCE_TYPE ,\
+                PUBLIC_IPV4 ,CPUUTILIZATION ,DISKUTILIZATION ,DISKSIZE  \
+                DISKAVAIL ,DISKUSED ,MEMORYUSAGE , MEMORYUTILIZATION \
+                MEMORYTOTAL, MEMORYAVAIL , LOG_TIME ) SELECT({instance_id}),({hostname}),({instance_type}),\
+                ({public_ipv4}),({cpuutilization}),({diskutilization}), ({disksize}),({diskavail}),({diskused}), \
+                ({memoryusage}),({memoryutilized}),({memorytotal}), ({memoryavail}), ({log_time}) \
+                WHERE NOT EXISTS(SELECT * FROM {table}  WHERE INSTANCE_ID=({instance_id}));\
+                '.format(instance_id = request_json["Metadata"]["instance-id"]),
                 hostname = request_json["Metadata"]["hostname"],
                 instance_type = request_json["Metadata"]["instance-type"],
                 public_ipv4= request_json["Metadata"]["public-ipv4"],
                 cpuutilization=request_json["CPUUtilization"]["CPUUtilization"]["Value"],
-                diskusage= request_json["DiskUsage"]["Percentageused"],
-                disksize = request_json["DiskUsage"]["Totalsize"],
-                diskavail = request_json["DiskUsage"]["Avail"],
-                diskused = request_json["DiskUsage"]["Used"],
+                diskutilization= request_json["Diskutilization"]["Percentageused"],
+                disksize = request_json["Diskutilization"]["Totalsize"],
+                diskavail = request_json["Diskutilization"]["Avail"],
+                diskused = request_json["Diskutilization"]["Used"],
                 memoryusage = request_json["MemmoryUtilization"]["Mem_used"],
                 memoryutilized = request_json["MemmoryUtilization"]["MemoryUtilized"]["Value"],
                 memorytotal = request_json["MemmoryUtilization"]["Total_Mem"]
                 memoryavail = request_json["MemmoryUtilization"]["Available_Mem"]
-                time = request_json["Time"]
-                )
-
-    db.session.add(metric)
-    db.session.commit()
-    return({"Status":"Updated"})
-
-
- 
+                log_time = request_json["Time"] ))
+    conn.commit()
+    conn.close()
 
 if __name__ == '__main__':
     api.run(host='0.0.0.0', port=6000)
