@@ -1,10 +1,13 @@
 # !/usr/bin/python3
 
-import sys, subprocess, json, os , time
+import subprocess, json, os , time , atexit
 import requests
 from datetime import datetime
 from flask import Flask, request ,jsonify
+from apscheduler.schedulers.background import BackgroundScheduler
 
+
+app = Flask(__name__)
 
 
 def Diskutilization():
@@ -82,8 +85,17 @@ def DiskActivity():
     return(payload)
 
 
+def SendMetrics():
+    payload = metrics()
+    url='http://13.233.126.248:6000/app/post/data'
+    r = requests.post(url, data=json.dumps(payload),headers={"Content-Type": "application/json"})
+    print(r.status_code)
 
-app = Flask(__name__)
+interval_sec=300
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=SendMetrics, trigger="interval",seconds=interval_sec)
+scheduler.start()
+atexit.register(lambda : scheduler.shutdown())
 
 #routes
 
@@ -126,7 +138,24 @@ def graph():
 
     return jsonify(payload)
 
+@app.route('/update/status')
+def status():
+    status = request.args.get('status')
+    if status == "pause":
+        scheduler.pause()
+    if status == "resume":
+        scheduler.resume()
+    if status == "stop":
+        scheduler.stop()
+    return jsonify({"Status":status})
 
+
+@app.route('/update/interval')
+def interval():
+    global interval_sec 
+    interval_sec = int(request.args.get('interval') )
+    return jsonify({"Status":"Post interval updated ",
+                    "Interval": interval_sec })
 
 
 if __name__ == "__main__":
