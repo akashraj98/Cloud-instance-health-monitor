@@ -97,7 +97,7 @@ def SendMetrics():
     r = requests.post(url, data=payload,headers={"Content-Type": "application/json"})
     
 
-interval_sec=3
+interval_sec=10
 scheduler = BackgroundScheduler(deamon=True)
 scheduler.add_job(func=SendMetrics, trigger="interval",seconds=interval_sec)
 scheduler.start()
