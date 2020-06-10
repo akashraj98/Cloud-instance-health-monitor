@@ -22,8 +22,10 @@ cursor.execute(f"CREATE TABLE {table} (INSTANCE_ID TEXT ,HOSTNAME TEXT,INSTANCE_
 conn.commit()
 
 
-
-def checkCPU(hostname,instanceid,publicipv4,currentValue,threshold = 80):
+cpuusagelimit = 80
+memoryusagelimit = 80
+diskusagelimit = 80
+def checkCPU(hostname,instanceid,publicipv4,currentValue,threshold = cpuusagelimit):
     if currentValue> threshold:
         url = "http://{}/get/metrics".format(publicipv4)
         params= {
@@ -42,7 +44,7 @@ def checkCPU(hostname,instanceid,publicipv4,currentValue,threshold = 80):
 
 
 
-def checkMemory(hostname,instanceid,publicipv4,currentValue,threshold = 80):
+def checkMemory(hostname,instanceid,publicipv4,currentValue,threshold = memoryusagelimit):
     if currentValue> threshold:
         url = "http://{}/get/metrics".format(publicipv4)
         params= {
@@ -60,8 +62,8 @@ def checkMemory(hostname,instanceid,publicipv4,currentValue,threshold = 80):
 
 
 
-def checkDisk(hostname,instanceid,publicipv4,currentValue,threshold = 80):
-    if currentValue> threshold:
+def checkDisk(hostname,instanceid,publicipv4,currentValue,threshold = diskusagelimit):
+    if currentValue > threshold:
         url = "http://{}/get/metrics".format(publicipv4)
         params= {
             'interval':'1',
@@ -125,7 +127,6 @@ def data():
         checkDisk(hostname,instance_id,public_ipv4,memoryutilized)
 
         return jsonify({"Status":"Sucessfully recieved"})
-
 
 
 

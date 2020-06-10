@@ -26,7 +26,7 @@ The data collected by reported is exposed by endpoints:
     Query parameter to pass
           - interval = seconds
           - metric = name of metric
-     - /get/metadata
+      - /get/metadata
     Returns all metadata about the instance
 
 #### Testing Instance
@@ -36,3 +36,12 @@ By default, the Replorter app will use port 5000,
 ```sh
 http://13.233.126.248:5000/get/metadata
 ```
+
+## Manager
+ - Manager will recives post request from all the reporter running on different instance
+ - Maintain record of every instance in a databse
+ - Checks different metrics and sends notification to the user in form of email or slack message.
+ - Available Endpoints
+    - POST
+        - /app/post/data
+        Data is sent to this endpoint in json format
