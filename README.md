@@ -51,6 +51,9 @@ http://13.233.126.248:5000/get/metadata
  - Manager will recives post request from all the reporter running on different instance
  - Maintain record of every instance in a databse
  - Checks different metrics and sends notification to the user in form of email or slack message.
+    -CPUCheck 
+    -MemoryCheck
+    -DiskCheck
  - Available Endpoints
     - POST
         - /app/post/data
