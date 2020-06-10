@@ -49,7 +49,10 @@ def data():
                         MEMORYTOTAL, MEMORYAVAIL , LOG_TIME ) SELECT(?),
                         (?),(?),(?),(?),(?), (?),(?),(?),(?),(?),(?), (?),
                         (?) WHERE NOT EXISTS(SELECT * FROM Report  
-                        WHERE INSTANCE_ID=?)""",(instance_id,hostname,instance_type,public_ipv4,cpuutilization,diskutilization,disksize,diskavail,diskused,memoryusage,memoryutilized,memorytotal,memoryavail,log_time,instance_id))
+                        WHERE INSTANCE_ID=?)""",(instance_id,hostname,instance_type, \
+                        public_ipv4,cpuutilization,diskutilization,disksize,diskavail,\
+                        diskused,memoryusage,memoryutilized,memorytotal,memoryavail,\
+                        log_time,instance_id))
 
         return jsonify({"Status":"Sucessfully recieved"})
 
