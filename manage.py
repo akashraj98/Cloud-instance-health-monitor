@@ -3,6 +3,7 @@
 from flask import Flask, request ,jsonify
 import sqlite3
 import json #not req
+from statistics import mean
 
 managerapp =Flask(__name__)
 
@@ -20,6 +21,71 @@ cursor.execute(f"CREATE TABLE {table} (INSTANCE_ID TEXT ,HOSTNAME TEXT,INSTANCE_
 
 conn.commit()
 
+
+
+def checkCPU(hostname,instanceid,publicipv4,currentValue,threshold = 80):
+    if currentValue> threshold:
+        url = "http://{}/get/metrics".format(publicipv4)
+        params= {
+            'interval':'1',
+            'metric':'CPUUtilization'
+        }
+        response = requests.get(url,params=params)
+        json_data = json.load(response.txt)
+        Values = []
+        for data in enumerate(json_data["Datapoint"]):
+            Value.append(int(data["CPUUtilization"]["Value"]))
+        Average = mean(Values)
+        if currentValue> threshold:
+            raiseticket(ticket='cpu',hostname,instanceid)
+
+
+
+
+def checkMemory(hostname,instanceid,publicipv4,currentValue,threshold = 80):
+    if currentValue> threshold:
+        url = "http://{}/get/metrics".format(publicipv4)
+        params= {
+            'interval':'1',
+            'metric':'MemmoryUtilization'            # Spelling of Memmory need to change in reporter.py also
+        }
+        response = requests.get(url,params=params)
+        json_data = json.load(response.txt)
+        Values = []
+        for data in json_data["Datapoint"]:
+            Value.append(int(data["MemoryUtilized"]["Value"]))
+        Average = mean(Values)
+        if currentValue> threshold:
+            raiseticket(ticket='Memory',hostname,instanceid)
+
+
+
+def checkDisk(hostname,instanceid,publicipv4,currentValue,threshold = 80):
+    if currentValue> threshold:
+        url = "http://{}/get/metrics".format(publicipv4)
+        params= {
+            'interval':'1',
+            'metric':'Diskutilization'            # Spelling of Memmory need to change in reporter.py also
+        }
+        response = requests.get(url,params=params)
+        json_data = json.load(response.txt)
+        Values = []
+        for data in json_data["Datapoint"]:
+            Value.append(int(data["Diskutilization"]["Percentageused"]))
+        Average = mean(Values)
+        if currentValue> threshold:
+            raiseticket(ticket='Disk',hostname,instanceid)
+
+def raiseticket(ticket,hostname,instanceid):
+    headers = {
+    'Content-type': 'application/json',
+    }
+    data = {"tickettype":ticket,
+            "hostname": hostname,
+            "instanceid": instanceid}
+    response = requests.post('https://hooks.slack.com/services/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', headers=headers, data=json.dumps(data))
+
+    
 
 @managerapp.route('/app/post/data', methods=["POST"])
 def data():
@@ -54,7 +120,12 @@ def data():
                         diskused,memoryusage,memoryutilized,memorytotal,memoryavail,\
                         log_time,instance_id))
 
+        checkCPU(hostname,instanceid,publicipv4,cpuutilization)
+        checkMemory(hostname,instanceid,publicipv4,diskutilization)
+        checkDiskhostname,instanceid,publicipv4,memoryutilized)
+
         return jsonify({"Status":"Sucessfully recieved"})
+
 
 
 

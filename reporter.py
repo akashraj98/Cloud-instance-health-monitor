@@ -131,11 +131,9 @@ def metrics():
 def graph():
     interval = request.args.get('interval')
     metric_name = request.args.get('metric')
-    Metrics = ['CPUUtilization','DiskActivity','MemmoryUtilization',
+    Metrics = ['CPUUtilization','DiskActivity','MemoryUtilization', # spelling of Memory
                 'Diskutilization','NetworkActivity']
     No_of_Execution=3   # Default value 3
-    # if No_of_Execution is None:
-    #     No_of_Execution = 3
     payload={"Datapoints":[]}
     payload["Label"]=metric_name
     if metric_name in Metrics:
