@@ -9,25 +9,35 @@ Cloud Monitoring Application Consists of two main scripts Reorter[reporter.py] a
 
   - Reporter is the  script that is run on each instance and collect data 
   - Data collected by reporter 
-    - CPUUtilization
-    - DiskActivity
-    - MemmoryUtilization
-    - DiskUsage
-    - NetworkActivity
-    - MetaData
+    -CPUUtilization
+    -DiskActivity
+    -MemmoryUtilization
+    -DiskUsage
+    -NetworkActivity
+    -MetaData
 
+Reporter keep sending data to Monitor through a post request which can be use to monitor instance
 
 The data collected by reported is exposed by endpoints:
   - Available Endpoints
     - GET
       -  /get/metrics : Returns all metrics data
       -  /get/graph
-    Can be use to make graph of a perticular metrics
-    Query parameter to pass
+        Can be use to make graph of a perticular metrics
+        Query parameter to pass
           - interval = seconds
           - metric = name of metric
+
       - /get/metadata
-    Returns all metadata about the instance
+Returns all  metadata about the instance
+    -  /update/status
+    Can be use to stop or resume the reporter app
+     Query parameter to pass
+        - status = {pause,resume,stop}
+    - /update/interval
+    Update the time after which the the reporter sends post request to manager
+    
+    
 
 #### Testing Instance
 

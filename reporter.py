@@ -140,7 +140,7 @@ def graph():
         for i in range(No_of_Execution):
             Datapoint=globals()[metric_name]()
             payload["Datapoints"].append(Datapoint)
-            time.sleep(int(interval))              #query  parametr is always string 
+            time.sleep(int(interval))             #query  parametr is always string 
 
     return jsonify(payload)
 
