@@ -84,20 +84,28 @@ def DiskActivity():
     payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     return(payload)
 
+def allmetrics():
+    payload = {'CPUUtilization': CPUUtilization(),'DiskActivity':DiskActivity(),'MemmoryUtilization':MemmoryUtilization(),
+                'Diskutilization':Diskutilization(),'NetworkActivity':NetworkActivity(),'Metadata':Metadata()}
+    payload['Time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    return json.dumps(payload)
+
 
 def SendMetrics():
-    payload = metrics()
-    url='http://13.233.126.248:6000/app/post/data'
-    r = requests.post(url, data=json.dumps(payload),headers={"Content-Type": "application/json"})
-    print(r.status_code)
+    payload = allmetrics()
+    url="http://13.233.126.248:6000/app/post/data"
+    r = requests.post(url, data=payload,headers={"Content-Type": "application/json"})
+    
 
-interval_sec=300
-scheduler = BackgroundScheduler()
+interval_sec=3
+scheduler = BackgroundScheduler(deamon=True)
 scheduler.add_job(func=SendMetrics, trigger="interval",seconds=interval_sec)
 scheduler.start()
 atexit.register(lambda : scheduler.shutdown())
 
 #routes
+with app.app_context():
+        SendMetrics()
 
 @app.route('/get/metadata')
 def metadata():
@@ -159,4 +167,5 @@ def interval():
 
 
 if __name__ == "__main__":
+
     app.run(host='0.0.0.0', port=5000)
