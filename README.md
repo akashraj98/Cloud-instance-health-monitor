@@ -7,6 +7,7 @@ Cloud Monitoring Application Consists of two main scripts Reorter[reporter.py] a
 
 ### Reporter
 
+
   - Reporter is the  script that is run on each instance and collect data 
   - Data collected by reporter 
     - CPUUtilization
