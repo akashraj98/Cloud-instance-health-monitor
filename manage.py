@@ -37,7 +37,7 @@ def checkCPU(hostname,instanceid,publicipv4,currentValue,threshold = 80):
             Value.append(int(data["CPUUtilization"]["Value"]))
         Average = mean(Values)
         if currentValue> threshold:
-            raiseticket(ticket='cpu',hostname,instanceid)
+            raiseticket(hostname,instanceid,ticket='cpu')
 
 
 
@@ -56,7 +56,7 @@ def checkMemory(hostname,instanceid,publicipv4,currentValue,threshold = 80):
             Value.append(int(data["MemoryUtilized"]["Value"]))
         Average = mean(Values)
         if currentValue> threshold:
-            raiseticket(ticket='Memory',hostname,instanceid)
+            raiseticket(hostname,instanceid,ticket='Memory')
 
 
 
@@ -74,9 +74,9 @@ def checkDisk(hostname,instanceid,publicipv4,currentValue,threshold = 80):
             Value.append(int(data["Diskutilization"]["Percentageused"]))
         Average = mean(Values)
         if currentValue> threshold:
-            raiseticket(ticket='Disk',hostname,instanceid)
+            raiseticket(hostname,instanceid,ticket='Disk')
 
-def raiseticket(ticket,hostname,instanceid):
+def raiseticket(hostname,instanceid,ticket):
     headers = {
     'Content-type': 'application/json',
     }
@@ -120,9 +120,9 @@ def data():
                         diskused,memoryusage,memoryutilized,memorytotal,memoryavail,\
                         log_time,instance_id))
 
-        checkCPU(hostname,instanceid,publicipv4,cpuutilization)
-        checkMemory(hostname,instanceid,publicipv4,diskutilization)
-        checkDiskhostname,instanceid,publicipv4,memoryutilized)
+        checkCPU(hostname,instance_id,public_ipv4,cpuutilization)
+        checkMemory(hostname,instance_id,public_ipv4,diskutilization)
+        checkDisk(hostname,instance_id,public_ipv4,memoryutilized)
 
         return jsonify({"Status":"Sucessfully recieved"})
 

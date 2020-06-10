@@ -1,5 +1,5 @@
-subprocess
 requests
 apscheduler
 flask
 datetime
+statistics
