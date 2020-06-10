@@ -9,12 +9,12 @@ Cloud Monitoring Application Consists of two main scripts Reorter[reporter.py] a
 
   - Reporter is the  script that is run on each instance and collect data 
   - Data collected by reporter 
-    -CPUUtilization
-    -DiskActivity
-    -MemmoryUtilization
-    -DiskUsage
-    -NetworkActivity
-    -MetaData
+    - CPUUtilization
+    - DiskActivity
+    - MemmoryUtilization
+    - DiskUsage
+    - NetworkActivity
+    - MetaData
 
 Reporter keep sending data to Monitor through a post request which can be use to monitor instance
 
@@ -51,9 +51,9 @@ http://13.233.126.248:5000/get/metadata
  - Manager will recives post request from all the reporter running on different instance
  - Maintain record of every instance in a databse
   - Checks different metrics and sends notification to the user in form of email or slack message.
-    -CPUCheck 
-    -MemoryCheck
-    -DiskCheck
+    - CPUCheck 
+    - MemoryCheck
+    - DiskCheck
  - Available Endpoints
     - POST
         - /app/post/data
