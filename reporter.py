@@ -98,8 +98,8 @@ def SendMetrics():
     
 
 interval_sec=10
-scheduler = BackgroundScheduler(deamon=True)
-scheduler.add_job(func=SendMetrics, trigger="interval",seconds=interval_sec)
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=SendMetrics, trigger="interval",seconds=interval_sec, id = 'send_post_req')
 scheduler.start()
 atexit.register(lambda : scheduler.shutdown())
 
@@ -131,7 +131,7 @@ def metrics():
 def graph():
     interval = request.args.get('interval')
     metric_name = request.args.get('metric')
-    Metrics = ['CPUUtilization','DiskActivity','MemoryUtilization', # spelling of Memory
+    Metrics = ['CPUUtilization','DiskActivity','MemmoryUtilization', # spelling of Memory
                 'Diskutilization','NetworkActivity']
     No_of_Execution=3   # Default value 3
     payload={"Datapoints":[]}
@@ -158,10 +158,11 @@ def status():
 
 @app.route('/update/interval')
 def interval():
-    global interval_sec 
+    #global interval_sec 
     interval_sec = int(request.args.get('interval') )
+    scheduler.reschedule_job('send_post_req', trigger='interval', seconds = interval_sec)
     return jsonify({"Status":"Post interval updated ",
-                    "Interval": interval_sec })
+                    "Interval": interval_sec  })
 
 
 if __name__ == "__main__":
