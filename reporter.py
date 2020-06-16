@@ -93,7 +93,7 @@ def allmetrics():
 
 def SendMetrics():
     payload = allmetrics()
-    url="http://13.233.126.248:6000/app/post/data"
+    url="http://13.126.53.116:6000/app/post/data"
     r = requests.post(url, data=payload,headers={"Content-Type": "application/json"})
     
 

@@ -45,7 +45,7 @@ Returns all  metadata about the instance
 By default, the Replorter app will use port 5000, 
 
 ```sh
-http://13.233.126.248:5000/get/metadata
+http://13.126.53.116:5000/get/metadata
 ```
 
 ## Manager
