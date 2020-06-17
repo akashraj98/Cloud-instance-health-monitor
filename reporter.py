@@ -99,7 +99,10 @@ def SendMetrics():
 
 interval_sec=10
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=SendMetrics, trigger="interval",seconds=interval_sec, id = 'send_post_req')
+try:
+    scheduler.add_job(func=SendMetrics, trigger="interval",seconds=interval_sec, id = 'send_post_req')
+except Exception as err:
+    print('Handling run-time error:', err)
 scheduler.start()
 atexit.register(lambda : scheduler.shutdown())
 

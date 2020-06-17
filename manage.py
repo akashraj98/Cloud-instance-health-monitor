@@ -129,6 +129,12 @@ def data():
         return jsonify({"Status":"Sucessfully recieved"})
 
 
+@update.route('/update/interval')
+interval():
+    interval_sec = int(request.args.get('interval') )
+    with conn:
+        cursor.execute("""SELECT PUBLIC_IPV4 FROM REPORT WHERE """)
+
 
 if __name__ == '__main__':
     managerapp.run(host='0.0.0.0', port=6000)
