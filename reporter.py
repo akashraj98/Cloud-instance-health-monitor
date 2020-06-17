@@ -45,7 +45,7 @@ def MemmoryUtilization():
 
 
 def CPUUtilization():
-    cpu = subprocess.Popen(["sar| grep Average "], shell=True ,stdout=subprocess.PIPE)
+    cpu = subprocess.Popen(["sar 1 1| grep Average "], shell=True ,stdout=subprocess.PIPE)
     out,err = cpu.communicate()
     cpu = out.decode().split()
     cpu_usage = 100 - float(cpu[-1])
@@ -55,7 +55,7 @@ def CPUUtilization():
 
 
 def NetworkActivity():
-    net = subprocess.Popen(["sar -n DEV| grep Average | grep eth0"], shell=True ,stdout=subprocess.PIPE)
+    net = subprocess.Popen(["sar 1 1 -n DEV| grep Average | grep eth0"], shell=True ,stdout=subprocess.PIPE)
     out,err = net.communicate()
     net = out.decode().split()
     payload = {'rxpck/s':net[2],'txpck/s':net[3],'rxkB/s':net[4],'txkB/s':net[5]}
@@ -76,7 +76,7 @@ def NetworkStatus():
 
 
 def DiskActivity():
-    DiskOps = subprocess.Popen(["sar -b | grep Average"], shell=True ,stdout=subprocess.PIPE)
+    DiskOps = subprocess.Popen(["sar 1 1 -b | grep Average"], shell=True ,stdout=subprocess.PIPE)
     out,err = DiskOps.communicate()
     DiskOps = out.decode().split()
     payload = {'TotalTransections/s':DiskOps[1], 'WriteTransections/s':DiskOps[2],
